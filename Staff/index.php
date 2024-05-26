@@ -51,7 +51,7 @@
     <div>
       <h3 class="text-center">Welcome back!</h3>
       <p class="text-center">Login to your account :)</p>
-      <form style="min-width: 400px" action="authentication/verifyLogin.php" method="POST">
+      <form style="min-width: 400px" action="./authentication/verifyLogin.php" method="POST">
         <!-- USER ID -->
         <label for="id-input">User ID</label>
         <input type="text" class="form-control" id="id-input" name="user-id" placeholder="Enter user ID">

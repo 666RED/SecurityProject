@@ -14,7 +14,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course</title>
+  <title>Section</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -22,16 +22,15 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="./styles/style.css">
   <link rel="stylesheet" href="./styles/sidebar.css">
-  <link rel="stylesheet" href="./styles/course.css">
 </head>
 
 <body>
   <div class="container-fluid">
-    <!-- SIDEBAR -->
+    <!-- sidebar -->
     <div class="bg-dark text-white sidebar">
       <a href="dashboard.php" class="btn nav-btn text-white d-block text-start">Dashboard</a>
-      <a href="course.php" class="btn nav-btn text-white d-block text-start selected">Course</a>
-      <a href="section.php" class="btn nav-btn text-white d-block text-start">Section</a>
+      <a href="course.php" class="btn nav-btn text-white d-block text-start">Course</a>
+      <a href="section.php" class="btn nav-btn text-white d-block text-start selected">Section</a>
       <a href="lecturer.php" class="btn nav-btn text-white d-block text-start">Lecturer</a>
       <a href="student.php" class="btn nav-btn text-white d-block text-start">Student</a>
       <a href="clearId.php"
@@ -39,17 +38,17 @@
     </div>
 
     <div class="main-content">
-      <h1 class="title">Course</h1>
+      <h1 class="title">Section</h1>
       <!-- ADD NEW BUTTON -->
       <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
-        onclick="window.location.href = 'operation/course/addCourse.php'">Add New</button>
-      <!-- SECRCH BAR -->
+        onclick="window.location.href = 'operation/section/addSection.php'">Add New</button>
+      <!-- SEARCH BAR -->
       <div class="position-relative d-inline">
         <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Course code" id="courseCodeInput">
         <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
       </div>
       <!-- TABLE -->
-      <table class="table table-striped table-bordered border-dark mt-4" id="courseTable">
+      <table class="table table-striped table-bordered border-dark mt-4" id="sectionTable">
         <!-- TABLE HEAD -->
         <thead>
           <div class="row">
@@ -59,11 +58,20 @@
             <th scope="col" class="col-2 text-center">
               Course code
             </th>
-            <th scope="col" class="col-5">
-              Name
+            <th scope="col" class="col-1 text-center">
+              Section
+            </th>
+            <th scope="col" class="col-1 text-center">
+              Day
             </th>
             <th scope="col" class="col-2 text-center">
-              Credit hour
+              Time
+            </th>
+            <th scope="col" class="col-2">
+              Lecturer
+            </th>
+            <th scope="col" class="col-1 text-center">
+              Type
             </th>
             <th scope="col" class="col-2 text-center">
               Operation
@@ -75,7 +83,7 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT course_code, course_name, course_credit_hour FROM course ORDER BY course_credit_hour, course_code";
+              $sql = "SELECT s.section_id, s.course_code, s.section_number, s.section_day, s.section_start_time, s.section_end_time, s.section_quota, s.section_type, l.lecturer_name FROM section s JOIN lecturer l ON s.lecturer_id = l.lecturer_id ORDER BY s.course_code, s.section_number";
 
               $result = mysqli_query($conn, $sql);
 
@@ -86,21 +94,30 @@
           <tr>
             <td scope="row" class="text-center"><?php echo $count++?></td>
             <td class="text-center"><?php echo $row["course_code"]?></td>
-            <td><?php echo $row["course_name"]?></td>
-            <td class="text-center"><?php echo $row["course_credit_hour"]?></td>
+            <td class="text-center"><?php echo $row["section_number"]?></td>
+            <td class="text-center"><?php echo $row["section_day"]?></td>
+            <td class="text-center"><?php echo $row["section_start_time"] . " - " . $row["section_end_time"] ?></td>
+            <td><?php echo $row["lecturer_name"] ?></td>
+            <td class="text-center"><?php echo $row["section_type"] ?></td>
             <!-- OPERATION -->
             <td>
               <div class="row">
-                <div class="col-6 text-center">
-                  <a href="./operation/course/editCourse.php?id=<?php echo $row["course_code"]?>">
+                <div class="col-4 text-center">
+                  <a href="./operation/section/viewSection.php?id=<?php echo $row["section_id"] ?>">
+                    <i class="fa-solid fa-eye text-primary"></i>
+                  </a>
+                </div>
+                <div class="col-4 text-center">
+                  <a href="./operation/section/editSection.php?id=<?php echo $row["section_id"]?>">
                     <i class="fa-solid fa-pencil text-success"></i>
                   </a>
                 </div>
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                   <a href="#">
                     <i class="fa-solid fa-trash text-danger"
-                      onclick="deleteCourse('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['course_name'], ENT_QUOTES)?>')"
+                      onclick="deleteSection('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['section_number'], ENT_QUOTES)?>', '<?php echo $row['section_id']?>')"
                       name="delete"></i>
+
                   </a>
                 </div>
               </div>
@@ -124,57 +141,66 @@
   }
   window.onload = init;
 
-  const deleteCourse = (code, name) => {
-    const result = confirm(`Delete ${name}?`);
+  const deleteSection = (code, number, id) => {
+    const result = confirm(`Delete ${code} section ${number}?`);
     if (result) {
-      window.location.href = `crud/course/deleteCourseOperation.php?id=${code}`;
+      window.location.href = `crud/section/deleteSectionOperation.php?id=${id}`;
     }
   }
+
   // SEARCH
   $(document).ready(function() {
     $('#courseCodeInput').on('input', function() {
       var courseCode = $(this).val().trim();
 
       $.ajax({
-        url: 'operation/course/searchCourse.php',
+        url: 'operation/section/searchSection.php',
         method: 'GET',
         data: {
           courseCode: courseCode
         },
         success: function(response) {
-          $('#courseTable tbody').empty();
+          $('#sectionTable tbody').empty();
 
           if (response.length > 0) {
             response.forEach((course, index) => {
-              $('#courseTable tbody').append(`
-                  <tr>
-                    <td class="text-center">${index + 1}</td>
-                    <td class="text-center">${course.course_code}</td>
-                    <td>${course.course_name}</td>
-                    <td class="text-center">${course.course_credit_hour}</td>
-                    <td>
-                      <div class="row">
-                        <div class="col-6 text-center">
-                          <a href="./operation/course/editCourse.php?id=${course.course_code}">
-                            <i class="fa-solid fa-pencil text-success"></i>
-                          </a>
-                        </div>
-                        <div class="col-6 text-center">
-                          <a href="#" onclick="deleteCourse('${course.course_code}', '${course.course_name}')">
-                            <i class="fa-solid fa-trash text-danger"></i>
-                          </a>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                `);
+              $('#sectionTable tbody').append(`
+              <tr>
+                <td class="text-center">${index + 1}</td>
+                <td class="text-center">${course.course_code}</td>
+                <td class="text-center">${course.section_number}</td>
+                <td class="text-center">${course.section_day}</td>
+                <td class="text-center">${course.section_start_time} - ${course.section_end_time}</td>
+                <td>${course.lecturer_name}</td>
+                <td class="text-center">${course.section_type}</td>
+                <td>
+                  <div class="row">
+                    <div class="col-4 text-center">
+                      <a href="./operation/section/viewSection.php?id=${course.section_id}">
+                        <i class="fa-solid fa-eye text-primary"></i>
+                      </a>
+                    </div>
+                    <div class="col-4 text-center">
+                      <a href="./operation/section/editSection.php?id=${course.section_id}">
+                        <i class="fa-solid fa-pencil text-success"></i>
+                      </a>
+                    </div>
+                    <div class="col-4 text-center">
+                      <a href="#" onclick="deleteSection('${course.course_code}', '${course.section_number}', '${course.section_id}')">
+                        <i class="fa-solid fa-trash text-danger"></i>
+                      </a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `);
             });
           } else {
-            $('#courseTable tbody').append(`
-                <tr>
-                  <td colspan="5" class="text-center">No courses found</td>
-                </tr>
-              `);
+            $('#sectionTable tbody').append(`
+            <tr>
+              <td colspan="8" class="text-center">No sections found</td>
+            </tr>
+          `);
           }
         },
         error: function(xhr, status, error) {

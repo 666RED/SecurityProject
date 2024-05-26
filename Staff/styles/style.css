@@ -18,3 +18,18 @@ body {
 .title {
 	padding: 10px 0px 0px 20px;
 }
+
+.add-new-button {
+	cursor: pointer;
+	padding: 5px;
+	border-radius: 10px;
+	border: 1px solid black;
+	top: 0;
+	right: 10px;
+	background-color: rgb(0, 0, 255);
+	color: white;
+}
+
+.add-new-button:hover {
+	opacity: 0.7;
+}

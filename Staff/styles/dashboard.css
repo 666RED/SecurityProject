@@ -3,6 +3,7 @@
 	min-width: 200px;
 	min-height: 150px;
 	cursor: pointer;
+	border: 1px solid black;
 }
 
 .card:hover {
@@ -11,24 +12,16 @@
 
 .card-title {
 	text-align: center;
-	color: white;
 }
 
 .card-text {
 	font-size: 50px;
 	font-weight: bold;
 	text-align: center;
-	color: white;
 }
 
-.card-1 {
-	background-color: #e74c3c;
-}
-
-.card-2 {
-	background-color: #3498db;
-}
-
-.card-3 {
-	background-color: #2ecc71;
+.card-title-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
 }

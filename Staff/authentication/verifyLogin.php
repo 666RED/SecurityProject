@@ -3,16 +3,16 @@
 
   include '../db.php';
 
-  if(isset($_POST['login'])){
+  if(isset($_POST['login'])){ 
     $userId = mysqli_real_escape_string($conn, $_POST['user-id']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
-    $query = "SELECT * FROM staff WHERE userId = '$userId'";
+    $query = "SELECT * FROM staff WHERE staff_id = '$userId'";
     $result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
-        if (password_verify($password, $user['password'])) {
+        if (password_verify($password, $user['staff_password'])) {
             $_SESSION['admin'] = $userId;
             header('Location: ../dashboard.php');
         } else {
