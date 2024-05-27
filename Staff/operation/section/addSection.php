@@ -35,7 +35,7 @@
     <!-- COURSE CODE -->
     <div class="d-flex align-items-center">
       <p class="m-0 me-2">Course code:</p>
-      <select name="course-code" id="course-code-select" onchange="handleOnChange()">
+      <select name="course-code" id="course-code-select" oninput="handleoninput()">
         <?php 
           $sql = "SELECT course_code, course_name FROM course ORDER BY course_code";
 
@@ -73,17 +73,17 @@
         <div class="col">
           <!-- SECTION NUMBER -->
           <input type="number" class="form-control border border-secondary" name="section-number"
-            onchange="handleOnChange()" max="50" min="1" required id="sectionNumberInput">
+            oninput="handleoninput()" max="50" min="1" required id="sectionNumberInput">
         </div>
         <!-- QUOTA -->
         <div class="col">
           <input type="number" class="form-control border border-secondary" name="section-quota"
-            onchange="handleOnChange()" min="1" max="100" required>
+            oninput="handleoninput()" min="1" max="100" required>
         </div>
         <!-- TYPE -->
         <div class="col">
           <select name="section-type" id="section-type-select" class="w-100 h-100 rounded" required
-            onchange="handleOnChange()">
+            oninput="handleoninput()">
             <option value="A">Tutorial</option>
             <option value="K">Lecture</option>
           </select>
@@ -112,7 +112,7 @@
         <!-- DAY -->
         <div class="col">
           <select name="section-day" id="sectionDaySelect" class="w-100 h-100 rounded" required
-            onchange="handleOnChange()">
+            oninput="handleoninput()">
             <option value="Sun">Sun</option>
             <option value="Mon">Mon</option>
             <option value="Tue">Tue</option>
@@ -123,19 +123,19 @@
         <!-- START TIME -->
         <div class="col">
           <input type="time" name="section-start-time" class="form-control border border-secondary" required
-            onchange="handleOnChange()">
+            oninput="handleoninput()">
         </div>
         <!-- END TIME -->
         <div class="col">
           <input type="time" name="section-end-time" class="form-control border border-secondary" required
-            onchange="handleOnChange()">
+            oninput="handleoninput()">
         </div>
       </div>
     </div>
     <!-- LOCATION -->
     <p class="mt-3 mb-1">Location:</p>
     <input type="text" name="section-location" class="form-control border border-secondary" maxlength="100" required
-      onchange="handleOnChange()">
+      oninput="handleoninput()">
     <!-- DURATION AND LECTURER -->
     <div class="mt-3">
       <!-- TITLE -->
@@ -152,11 +152,11 @@
         <div class="col">
           <!-- DURATION -->
           <input type="number" min="1" max="4" required name="section-duration"
-            class="form-control border border-secondary" onchange="handleOnChange()">
+            class="form-control border border-secondary" oninput="handleoninput()">
         </div>
         <!-- LECTURER -->
         <div class="col">
-          <select name="lecturer" id="lecturer-select" class="w-100 h-100 rounded" onchange="handleOnChange()">
+          <select name="lecturer" id="lecturer-select" class="w-100 h-100 rounded" oninput="handleoninput()">
             <?php
               $sql = "SELECT lecturer_id, lecturer_name FROM lecturer ORDER BY lecturer_name";
               $result = mysqli_query($conn, $sql);
@@ -185,7 +185,7 @@
   <script>
   let discardChanges = false;
 
-  const handleOnChange = () => {
+  const handleoninput = () => {
     discardChanges = true;
   }
 
@@ -201,7 +201,7 @@
     }
   }
 
-  // check repeating section number
+  // check repeating section number (section_number)
   $(document).ready(function() {
     $('#sectionNumberInput').on('input', function() {
       var sectionNumber = $(this).val().trim();
@@ -238,12 +238,51 @@
     });
   });
 
-  // check repeating section number
+  // check repeating section number (section_type)
   $(document).ready(function() {
     $('#section-type-select').on('change', function() {
       var sectionNumber = $('#sectionNumberInput').val().trim();
       var courseCode = $('#course-code-select').val();
       var type = $(this).val();
+
+      if (sectionNumber !== '') {
+        $.ajax({
+          url: 'checkSectionNumber.php',
+          method: 'POST',
+          data: {
+            sectionNumber: sectionNumber,
+            courseCode: courseCode,
+            type: type
+          },
+          success: function(response) {
+            if (response === 'exists') {
+              $('#sectionNumberMessage').html(
+                '<span style="color: red;">Section number already exists</span>');
+              $('#add-button').prop('disabled', true);
+            } else {
+              $('#sectionNumberMessage').html('');
+              $('#add-button').prop('disabled', false);
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
+        });
+      } else {
+        $('#sectionNumberMessage').html('');
+        $('#add-button').prop('disabled', false);
+      }
+    });
+
+    $('#section-type-select').change();
+  });
+
+  // check repeating section number (course_code)
+  $(document).ready(function() {
+    $('#course-code-select').on('change', function() {
+      var sectionNumber = $('#sectionNumberInput').val().trim();
+      var courseCode = $('#course-code-select').val();
+      var type = $('#section-type-select').val();
 
       if (sectionNumber !== '') {
         $.ajax({
