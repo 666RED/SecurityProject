@@ -62,6 +62,9 @@
               Section
             </th>
             <th scope="col" class="col-1 text-center">
+              Type
+            </th>
+            <th scope="col" class="col-1 text-center">
               Day
             </th>
             <th scope="col" class="col-2 text-center">
@@ -69,9 +72,6 @@
             </th>
             <th scope="col" class="col-2">
               Lecturer
-            </th>
-            <th scope="col" class="col-1 text-center">
-              Type
             </th>
             <th scope="col" class="col-2 text-center">
               Operation
@@ -83,7 +83,7 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT s.section_id, s.course_code, s.section_number, s.section_day, s.section_start_time, s.section_end_time, s.section_quota, s.section_type, l.lecturer_name FROM section s JOIN lecturer l ON s.lecturer_id = l.lecturer_id ORDER BY s.course_code, s.section_number";
+              $sql = "SELECT s.course_code, s.section_number, s.section_day, s.section_start_time, s.section_end_time, s.section_quota, s.section_type, l.lecturer_name FROM section s JOIN lecturer l ON s.lecturer_id = l.lecturer_id ORDER BY s.course_code, s.section_number";
 
               $result = mysqli_query($conn, $sql);
 
@@ -95,29 +95,31 @@
             <td scope="row" class="text-center"><?php echo $count++?></td>
             <td class="text-center"><?php echo $row["course_code"]?></td>
             <td class="text-center"><?php echo $row["section_number"]?></td>
+            <td class="text-center"><?php echo $row["section_type"] === "K" ? 'Lecture' : 'Tutorial' ?></td>
             <td class="text-center"><?php echo $row["section_day"]?></td>
             <td class="text-center"><?php echo $row["section_start_time"] . " - " . $row["section_end_time"] ?></td>
             <td><?php echo $row["lecturer_name"] ?></td>
-            <td class="text-center"><?php echo $row["section_type"] ?></td>
+
             <!-- OPERATION -->
             <td>
               <div class="row">
                 <div class="col-4 text-center">
-                  <a href="./operation/section/viewSection.php?id=<?php echo $row["section_id"] ?>">
+                  <a
+                    href="./operation/section/viewSection.php?code=<?php echo $row["course_code"] ?>&number=<?php echo $row["section_number"] ?>&type=<?php echo $row["section_type"] ?>">
                     <i class="fa-solid fa-eye text-primary"></i>
                   </a>
                 </div>
                 <div class="col-4 text-center">
-                  <a href="./operation/section/editSection.php?id=<?php echo $row["section_id"]?>">
+                  <a
+                    href="./operation/section/editSection.php?code=<?php echo $row["course_code"]?>&number=<?php echo $row["section_number"] ?>&type=<?php echo $row["section_type"] ?>">
                     <i class="fa-solid fa-pencil text-success"></i>
                   </a>
                 </div>
                 <div class="col-4 text-center">
                   <a href="#">
                     <i class="fa-solid fa-trash text-danger"
-                      onclick="deleteSection('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['section_number'], ENT_QUOTES)?>', '<?php echo $row['section_id']?>')"
+                      onclick="deleteSection('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['section_number'], ENT_QUOTES)?>', '<?php echo htmlspecialchars($row['section_type'], ENT_QUOTES)?>')"
                       name="delete"></i>
-
                   </a>
                 </div>
               </div>
@@ -125,6 +127,11 @@
           </tr>
           <?php 
                 }
+              }else {
+              echo  
+                '<tr>
+                  <td colspan="8" class="text-center">No sections found</td>
+                </tr>';
               }
               mysqli_close( $conn );
             ?>
@@ -141,10 +148,10 @@
   }
   window.onload = init;
 
-  const deleteSection = (code, number, id) => {
+  const deleteSection = (code, number, type) => {
     const result = confirm(`Delete ${code} section ${number}?`);
     if (result) {
-      window.location.href = `crud/section/deleteSectionOperation.php?id=${id}`;
+      window.location.href = `crud/section/deleteSectionOperation.php?code=${code}&number=${number}&type=${type}`;
     }
   }
 
@@ -169,24 +176,25 @@
                 <td class="text-center">${index + 1}</td>
                 <td class="text-center">${course.course_code}</td>
                 <td class="text-center">${course.section_number}</td>
+                <td class="text-center">${course.section_type === "K" ? 'Lecture' : "Tutorial"}</td>
                 <td class="text-center">${course.section_day}</td>
                 <td class="text-center">${course.section_start_time} - ${course.section_end_time}</td>
                 <td>${course.lecturer_name}</td>
-                <td class="text-center">${course.section_type}</td>
+                
                 <td>
                   <div class="row">
                     <div class="col-4 text-center">
-                      <a href="./operation/section/viewSection.php?id=${course.section_id}">
+                      <a href="./operation/section/viewSection.php?code=${course.course_code}&number=${course.section_number}&type=${course.section_type}">
                         <i class="fa-solid fa-eye text-primary"></i>
                       </a>
                     </div>
                     <div class="col-4 text-center">
-                      <a href="./operation/section/editSection.php?id=${course.section_id}">
+                      <a href="./operation/section/editSection.php?code=${course.course_code}&number=${course.section_number}&type=${course.section_type}">
                         <i class="fa-solid fa-pencil text-success"></i>
                       </a>
                     </div>
                     <div class="col-4 text-center">
-                      <a href="#" onclick="deleteSection('${course.course_code}', '${course.section_number}', '${course.section_id}')">
+                      <a href="#" onclick="deleteSection('${course.course_code}', '${course.section_number}', '${course.section_type}')">
                         <i class="fa-solid fa-trash text-danger"></i>
                       </a>
                     </div>

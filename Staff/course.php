@@ -22,7 +22,6 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="./styles/style.css">
   <link rel="stylesheet" href="./styles/sidebar.css">
-  <link rel="stylesheet" href="./styles/course.css">
 </head>
 
 <body>
@@ -107,10 +106,15 @@
             </td>
           </tr>
           <?php 
-                }
               }
-              mysqli_close( $conn );
-            ?>
+            }else {
+              echo  
+                '<tr>
+                  <td colspan="8" class="text-center">No sections found</td>
+                </tr>';
+            }
+            mysqli_close( $conn );
+          ?>
         </tbody>
       </table>
     </div>

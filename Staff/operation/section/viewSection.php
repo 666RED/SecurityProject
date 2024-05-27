@@ -26,19 +26,21 @@
 <body>
   <form class="w-50 mx-auto rounded border border-secondary px-3 pt-2 pb-4 mt-4 position-relative">
     <!-- TITLE -->
-    <h2>Add section</h2>
+    <h2>View section</h2>
     <hr>
     <?php 
-      $section_id = $_GET['id'];
+      $course_code = $_GET['code'];
+      $section_number = $_GET['number'];
+      $section_type = $_GET['type'];
 
       $sql = "SELECT s.*, l.lecturer_name, c.course_name
         FROM section s 
         JOIN lecturer l ON s.lecturer_id = l.lecturer_id 
         JOIN course c ON s.course_code = c.course_code
-        WHERE s.section_id = ?";
+        WHERE s.course_code = ? AND s.section_number = ? AND s.section_type = ?";
 
       $stmt = $conn->prepare($sql);
-      $stmt->bind_param("i", $section_id);
+      $stmt->bind_param("sis", $course_code, $section_number, $section_type);
       $stmt->execute();
       $result = $stmt->get_result();
 

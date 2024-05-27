@@ -54,14 +54,14 @@
       <form style="min-width: 400px" action="./authentication/verifyLogin.php" method="POST">
         <!-- USER ID -->
         <label for="id-input">User ID</label>
-        <input type="text" class="form-control" id="id-input" name="user-id" placeholder="Enter user ID">
+        <input type="text" class="form-control" id="id-input" name="user-id" placeholder="Enter user ID" required>
         <!-- PASSWORD & ICONS -->
         <label for="password-input" class="mt-3">Password</label>
         <div class="position-relative">
           <i class="fa-solid fa-eye icon" id="open-eye" onclick="handleViewPassword(1)"></i>
           <i class="fa-solid fa-eye-slash icon d-none" id="close-eye" onclick="handleViewPassword(0)"></i>
           <input type="password" class="form-control mt-2" id="password-input" placeholder="Enter password"
-            name="password">
+            name="password" required>
         </div>
         <!-- LOGIN BUTTON -->
         <div class="text-center">

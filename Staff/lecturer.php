@@ -5,6 +5,7 @@
     echo 'Please login first <br>';
     echo 'Click <a href="index.php">here<a/> to login';
   }else {
+    include 'db.php';
 ?>
 
 <!DOCTYPE html>
@@ -38,8 +39,159 @@
 
     <div class="main-content">
       <h1 class="title">Lecturer</h1>
+      <!-- ADD NEW BUTTON -->
+      <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
+        onclick="window.location.href = 'operation/lecturer/addLecturer.php'">Add New</button>
+
+      <!-- SECRCH BAR -->
+      <div class="position-relative d-inline">
+        <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Lecturer Id" id="lecturerIdInput">
+        <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
+      </div>
+      <!-- TABLE -->
+      <table class="table table-striped table-bordered border-dark mt-4" id="lecturerTable">
+        <!-- TABLE HEAD -->
+        <thead>
+          <div class="row">
+            <th scope="col" class="col-1 text-center">#</th>
+            <th scope="col" class="col-2">Lecturer Id</th>
+            <th scope="col" class="col-3">Name</th>
+            <th scope="col" class="col-2">Phone number</th>
+            <th scope="col" class="col-2">Email</th>
+            <th scope="col" class="col-2 text-center">
+              Operation
+            </th>
+          </div>
+        </thead>
+        <!-- TABLE BODY -->
+        <tbody>
+          <?php 
+              $count = 1;
+
+              $sql = "SELECT lecturer_id, lecturer_name, lecturer_phone_number, lecturer_email FROM lecturer ORDER BY lecturer_id";
+
+              $result = mysqli_query($conn, $sql);
+
+              if(mysqli_num_rows($result) > 0) {
+                while($row = mysqli_fetch_assoc($result)) {
+          ?>
+          <!-- TABLE ROW -->
+          <tr>
+            <td scope="row" class="text-center"><?php echo $count++ ?></td>
+            <td scope="row"><?php echo $row["lecturer_id"] ?></td>
+            <td scope="row"><?php echo $row["lecturer_name"] ?></td>
+            <td scope="row"><?php echo $row["lecturer_phone_number"] ?></td>
+            <td scope="row"><?php echo $row["lecturer_email"] ?></td>
+            <!-- OPERATION -->
+            <td>
+              <div class="row">
+                <div class="col-4 text-center">
+                  <a href="./operation/lecturer/viewLecturer.php?id=<?php echo $row["lecturer_id"] ?>">
+                    <i class="fa-solid fa-eye text-primary"></i>
+                  </a>
+                </div>
+                <div class="col-4 text-center">
+                  <a href="./operation/lecturer/editLecturer.php?id=<?php echo $row["lecturer_id"] ?>">
+                    <i class="fa-solid fa-pencil text-success"></i>
+                  </a>
+                </div>
+                <div class="col-4 text-center">
+                  <a href="#">
+                    <i class="fa-solid fa-trash text-danger"
+                      onclick="deleteLecturer('<?php echo $row['lecturer_id']?>')" name="delete"></i>
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <?php 
+              }
+            }else {
+              echo  
+                '<tr>
+                  <td colspan="8" class="text-center">No sections found</td>
+                </tr>';
+            }
+            mysqli_close( $conn );
+          ?>
+        </tbody>
+      </table>
     </div>
   </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+  // CLEAR SEARCH INPUT
+  function init() {
+    document.getElementById("lecturerIdInput").value = "";
+  }
+  window.onload = init;
+
+  const deleteLecturer = (id) => {
+    const result = confirm(`Delete ${id}?`);
+    if (result) {
+      window.location.href = `crud/lecturer/deleteLecturerOperation.php?id=${id}`;
+    }
+  }
+
+  $(document).ready(function() {
+    $('#lecturerIdInput').on('input', function() {
+      var lecturerId = $(this).val().trim();
+
+      $.ajax({
+        url: 'operation/lecturer/searchLecturer.php',
+        method: 'GET',
+        data: {
+          lecturerId: lecturerId
+        },
+        success: function(response) {
+          $('#lecturerTable tbody').empty();
+
+          if (response.length > 0) {
+            response.forEach((lecturer, index) => {
+              $('#lecturerTable tbody').append(`
+                  <tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td>${lecturer.lecturer_id}</td>
+                    <td>${lecturer.lecturer_name}</td>
+                    <td>${lecturer.lecturer_phone_number}</td>
+                    <td>${lecturer.lecturer_email}</td>
+                    <td class="text-center">
+                      <div class="row">
+                        <div class="col-4 text-center">
+                          <a href="./operation/lecturer/viewLecturer.php?id=${lecturer.lecturer_id}">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                          </a>
+                        </div>
+                        <div class="col-4 text-center">
+                          <a href="./operation/lecturer/editLecturer.php?id=${lecturer.lecturer_id}">
+                            <i class="fa-solid fa-pencil text-success"></i>
+                          </a>
+                        </div>
+                        <div class="col-4 text-center">
+                          <a href="#" onclick="deleteLecturer('${lecturer.lecturer_id}')">
+                            <i class="fa-solid fa-trash text-danger"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                `);
+            });
+          } else {
+            $('#lecturerTable tbody').append(`
+                <tr>
+                  <td colspan="6" class="text-center">No lecturers found</td>
+                </tr>
+              `);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error searching lecturers:', error);
+        }
+      });
+    });
+  });
+  </script>
 </body>
 
 </html>

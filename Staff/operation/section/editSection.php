@@ -6,7 +6,24 @@
     echo 'Click <a href="index.php">here<a/> to login';
   }else {
     include '../../db.php';
-?>
+
+    $course_code = $_GET['code'];
+    $section_number = $_GET['number'];
+    $section_type = $_GET['type'];
+
+    $sql = "SELECT s.*, l.lecturer_name, c.course_name
+      FROM section s 
+      JOIN lecturer l ON s.lecturer_id = l.lecturer_id 
+      JOIN course c ON s.course_code = c.course_code
+      WHERE s.course_code = ? AND s.section_number = ? AND s.section_type = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sis", $course_code, $section_number, $section_type);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if($row = $result->fetch_assoc()) {
+    ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,37 +38,29 @@
     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="../../styles/style.css">
+
+  <style>
+  .disabled-field {
+    cursor: not-allowed;
+  }
+  </style>
 </head>
 
 <body>
   <form class="w-50 mx-auto rounded border border-secondary px-3 pt-2 pb-4 mt-4 position-relative"
-    action="../../crud/section/editSectionOperation.php?id=<?php echo $_GET["id"] ?>" method="POST" autocomplete="off">
+    action="../../crud/section/editSectionOperation.php?code=<?php echo $_GET["code"] ?>&number=<?php echo $_GET["number"] ?>&type=<?php echo $_GET["type"] ?>"
+    method="POST" autocomplete="off">
     <!-- CANCEL BUTTON -->
     <button type="button" onclick="handleCancel()"
       class="btn btn-secondary position-absolute end-0 me-3 mt-1">CANCEL</button>
     <!-- TITLE -->
     <h2>Edit section</h2>
     <hr>
-    <?php 
-      $section_id = $_GET['id'];
 
-      $sql = "SELECT s.*, l.lecturer_name, c.course_name
-        FROM section s 
-        JOIN lecturer l ON s.lecturer_id = l.lecturer_id 
-        JOIN course c ON s.course_code = c.course_code
-        WHERE s.section_id = ?";
-
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("i", $section_id);
-      $stmt->execute();
-      $result = $stmt->get_result();
-
-      if($row = $result->fetch_assoc()) {
-    ?>
     <!-- COURSE CODE -->
     <div class="d-flex align-items-center">
       <p class="m-0 me-2">Course code:</p>
-      <select name="course-code" id="course-code-select" oninput="handleoninput()">
+      <select name="course-code" id="course-code-select" class=" disabled-field" disabled>
         <?php 
           $sql_courses = "SELECT course_code, course_name FROM course ORDER BY course_code";
           $result_courses = mysqli_query($conn, $sql_courses);
@@ -88,9 +97,8 @@
       <div class="row">
         <div class="col">
           <!-- SECTION NUMBER -->
-          <input type="number" class="form-control border border-secondary" name="section-number"
-            oninput="handleoninput()" max="50" min="1" required id="sectionNumberInput"
-            value="<?php echo $row["section_number"] ?>">
+          <input type="number" class="form-control border border-secondary  disabled-field" name="section-number"
+            id="sectionNumberInput" value="<?php echo $row["section_number"] ?>" readonly>
         </div>
         <!-- QUOTA -->
         <div class="col">
@@ -99,8 +107,7 @@
         </div>
         <!-- TYPE -->
         <div class="col">
-          <select name="section-type" id="section-type-select" class="w-100 h-100 rounded" required
-            oninput="handleoninput()">
+          <select name="section-type" id="section-type-select" class="w-100 h-100 rounded  disabled-field" disabled>
             <option value="A" <?php echo ($row["section_type"] == "A") ? 'selected' : ''; ?>>Tutorial</option>
             <option value="K" <?php echo ($row["section_type"] == "K") ? 'selected' : ''; ?>>Lecture</option>
           </select>
@@ -196,10 +203,7 @@
         </div>
       </div>
     </div>
-    <?php 
-      }
-      mysqli_close( $conn );
-    ?>
+
 
     <!-- EDIT BUTTON -->
     <div class="text-center">
@@ -227,130 +231,15 @@
       window.location.href = '../../section.php';
     }
   }
-
-  // check repeating section number
-  $(document).ready(function() {
-    $('#sectionNumberInput').on('input', function() {
-      var sectionId = "<?php echo $_GET['id']; ?>";
-      var sectionNumber = $(this).val().trim();
-      var courseCode = $('#course-code-select').val();
-      var type = $('#section-type-select').val();
-
-      if (sectionNumber !== '') {
-        $.ajax({
-          url: 'checkSectionNumberEdit.php',
-          method: 'POST',
-          data: {
-            sectionId: sectionId,
-            sectionNumber: sectionNumber,
-            courseCode: courseCode,
-            type: type
-          },
-          success: function(response) {
-            if (response === 'exists') {
-              $('#sectionNumberMessage').html(
-                '<span style="color: red;">Section number already exists</span>');
-              $('#add-button').prop('disabled', true);
-            } else {
-              $('#sectionNumberMessage').html('');
-              $('#add-button').prop('disabled', false);
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-          }
-        });
-      } else {
-        $('#sectionNumberMessage').html('');
-        $('#add-button').prop('disabled', false);
-      }
-    });
-  });
-
-  // check repeating section number
-  $(document).ready(function() {
-    $('#section-type-select').on('change', function() {
-      var sectionNumber = $('#sectionNumberInput').val().trim();
-      var courseCode = $('#course-code-select').val();
-      var type = $(this).val();
-      var sectionId = <?php echo $_GET['id'] ?>
-
-      if (sectionNumber !== '') {
-        $.ajax({
-          url: 'checkSectionNumberEdit.php',
-          method: 'POST',
-          data: {
-            sectionId: sectionId,
-            sectionNumber: sectionNumber,
-            courseCode: courseCode,
-            type: type
-          },
-          success: function(response) {
-            if (response === 'exists') {
-              $('#sectionNumberMessage').html(
-                '<span style="color: red;">Section number already exists</span>');
-              $('#add-button').prop('disabled', true);
-            } else {
-              $('#sectionNumberMessage').html('');
-              $('#add-button').prop('disabled', false);
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-          }
-        });
-      } else {
-        $('#sectionNumberMessage').html('');
-        $('#add-button').prop('disabled', false);
-      }
-    });
-
-    $('#section-type-select').change();
-  });
-
-  // check repeating section number (course_code)
-  $(document).ready(function() {
-    $('#course-code-select').on('change', function() {
-      var sectionNumber = $('#sectionNumberInput').val().trim();
-      var courseCode = $('#course-code-select').val();
-      var type = $('#section-type-select').val();
-
-      if (sectionNumber !== '') {
-        $.ajax({
-          url: 'checkSectionNumber.php',
-          method: 'POST',
-          data: {
-            sectionNumber: sectionNumber,
-            courseCode: courseCode,
-            type: type
-          },
-          success: function(response) {
-            if (response === 'exists') {
-              $('#sectionNumberMessage').html(
-                '<span style="color: red;">Section number already exists</span>');
-              $('#add-button').prop('disabled', true);
-            } else {
-              $('#sectionNumberMessage').html('');
-              $('#add-button').prop('disabled', false);
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-          }
-        });
-      } else {
-        $('#sectionNumberMessage').html('');
-        $('#add-button').prop('disabled', false);
-      }
-    });
-
-    $('#section-type-select').change();
-  });
   </script>
 </body>
 
 </html>
 
 <?php 
+  }else {
+    echo '<h2>Section not found</h2>';
+  }
+  mysqli_close( $conn );
   }
 ?>
