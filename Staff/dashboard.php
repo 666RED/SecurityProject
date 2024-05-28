@@ -30,7 +30,7 @@
 
       include 'db.php';
 
-      $query = "SELECT COUNT(*) AS total_count FROM $name";
+      $query = "SELECT COUNT(*) AS total_count FROM $name WHERE ${name}_archive = 0";
 
       $result = mysqli_query($conn, $query);
 
@@ -62,28 +62,31 @@
       <!-- card -->
       <div class="my-5 card-container">
         <div class="row">
+          <!-- COURSE -->
           <div class="col-4">
-            <div class="card w-75 mx-auto my-3" onclick="window.location.href = 'Course.php'">
+            <div class="card w-75 mx-auto my-3 pb-3" onclick="window.location.href = 'Course.php'">
               <div class="card-body card-title-container">
-                <i class="fa-solid fa-book fs-2"></i>
+                <i class="fa-solid fa-book fs-1"></i>
                 <h5 class="card-title">Total Course</h5>
               </div>
               <p class="card-text"><?php echo $numOfCourse;?></p>
             </div>
           </div>
+          <!-- LECTURER -->
           <div class="col-4">
-            <div class="card w-75 mx-auto my-3" onclick="window.location.href = 'lecturer.php'">
+            <div class="card w-75 mx-auto my-3 pb-3" onclick="window.location.href = 'lecturer.php'">
               <div class="card-body card-title-container">
-                <i class="fa-solid fa-chalkboard-user fs-2"></i>
+                <i class="fa-solid fa-chalkboard-user fs-1"></i>
                 <h5 class="card-title">Total Lecturer</h5>
               </div>
               <p class="card-text"><?php echo $numOfLecturer?></p>
             </div>
           </div>
+          <!-- STUDENT -->
           <div class="col-4">
-            <div class="card w-75 mx-auto my-3" onclick="window.location.href = 'student.php'">
+            <div class="card w-75 mx-auto my-3 pb-3" onclick="window.location.href = 'student.php'">
               <div class="card-body card-title-container">
-                <i class="fa-solid fa-user fs-2"></i>
+                <i class="fa-solid fa-user fs-1"></i>
                 <h5 class="card-title">Total Student</h5>
               </div>
               <p class="card-text"><?php echo $numOfStudent;?></p>

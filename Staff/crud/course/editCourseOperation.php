@@ -2,11 +2,12 @@
   include '../../db.php';
 
   if(isset($_POST['edit'])){
+    $code = $_GET['id'];
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $creditHour = mysqli_real_escape_string($conn, $_POST['credit-hour']);
-    $code = mysqli_real_escape_string($conn, $_POST['code']);
+    $courseCode = mysqli_real_escape_string($conn, $_POST['code']);
 
-    $sql = "UPDATE course SET course_name = ?, course_credit_hour = ? WHERE course_code = ?";
+    $sql = "UPDATE course SET course_code = ?, course_name = ?, course_credit_hour = ? WHERE course_code = ?";
 
     if (empty($name) || empty($creditHour) || empty($code)) {
         echo "All fields are required.";
@@ -16,7 +17,7 @@
     $stmt = mysqli_stmt_init($conn);
     
     if (mysqli_stmt_prepare($stmt, $sql)) {
-      mysqli_stmt_bind_param($stmt, "sis", $name, $creditHour, $code);
+      mysqli_stmt_bind_param($stmt, "ssis", $courseCode, $name, $creditHour, $code);
 
       if (mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);

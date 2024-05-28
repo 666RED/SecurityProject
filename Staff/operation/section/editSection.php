@@ -98,7 +98,7 @@
         <div class="col">
           <!-- SECTION NUMBER -->
           <input type="number" class="form-control border border-secondary  disabled-field" name="section-number"
-            id="sectionNumberInput" value="<?php echo $row["section_number"] ?>" readonly>
+            id="sectionNumberInput" value="<?php echo $row["section_number"] ?>" readonly disabled>
         </div>
         <!-- QUOTA -->
         <div class="col">
@@ -137,11 +137,11 @@
         <div class="col">
           <select name="section-day" id="sectionDaySelect" class="w-100 h-100 rounded" required
             oninput="handleoninput()">
-            <option value="Sun" selected="<?php echo $row["section_day"] == "Sun" ? 'selected' : '' ?>">Sun</option>
-            <option value="Mon" selected="<?php echo $row["section_day"] == "Mon" ? 'selected' : '' ?>">Mon</option>
-            <option value="Tue" selected="<?php echo $row["section_day"] == "Tue" ? 'selected' : '' ?>">Tue</option>
-            <option value="Wed" selected="<?php echo $row["section_day"] == "Wed" ? 'selected' : '' ?>">Wed</option>
-            <option value="Thu" selected="<?php echo $row["section_day"] == "Thu" ? 'selected' : '' ?>">Thu</option>
+            <option value="Sun" <?php echo $row["section_day"] == "Sun" ? 'selected' : '' ?>>Sun</option>
+            <option value="Mon" <?php echo $row["section_day"] == "Mon" ? 'selected' : '' ?>>Mon</option>
+            <option value="Tue" <?php echo $row["section_day"] == "Tue" ? 'selected' : '' ?>>Tue</option>
+            <option value="Wed" <?php echo $row["section_day"] == "Wed" ? 'selected' : '' ?>>Wed</option>
+            <option value="Thu" <?php echo $row["section_day"] == "Thu" ? 'selected' : '' ?>>Thu</option>
           </select>
         </div>
         <!-- START TIME -->
@@ -183,7 +183,7 @@
         <div class="col">
           <select name="lecturer" id="lecturer-select" class="w-100 h-100 rounded" oninput="handleoninput()">
             <?php
-              $sql = "SELECT lecturer_id, lecturer_name FROM lecturer ORDER BY lecturer_name";
+              $sql = "SELECT lecturer_id, lecturer_name FROM lecturer WHERE lecturer_archive = 0 ORDER BY lecturer_name";
               $result = mysqli_query($conn, $sql);
 
               if (mysqli_num_rows($result) > 0) {

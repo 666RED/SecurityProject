@@ -3,7 +3,7 @@
 
   $courseCode = $_GET['courseCode']; 
 
-  $sql = "SELECT * FROM course WHERE course_code LIKE ? ORDER BY course_credit_hour, course_code";
+  $sql = "SELECT * FROM course WHERE course_code LIKE ? AND course_archive = 0 ORDER BY course_credit_hour, course_code";
 
   $stmt = $conn->prepare($sql);
 

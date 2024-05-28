@@ -5,18 +5,19 @@
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $creditHour = mysqli_real_escape_string($conn, $_POST['credit-hour']);
     $code = mysqli_real_escape_string($conn, $_POST['code']);
+    $archive = 0;
 
     if (empty($name) || empty($creditHour) || empty($code)) {
-        echo "All fields are required.";
-        exit();
+      echo "All fields are required.";
+      exit();
     }
     
-    $sql = "INSERT INTO course VALUES (?, ?, ?)";
+    $sql = "INSERT INTO course VALUES (?, ?, ?, ?)";
 
     $stmt = mysqli_stmt_init($conn);
 
   if (mysqli_stmt_prepare($stmt, $sql)) {
-    mysqli_stmt_bind_param($stmt, "ssi", $code, $name, $creditHour);
+    mysqli_stmt_bind_param($stmt, "ssii", $code, $name, $creditHour, $archive);
 
     if (mysqli_stmt_execute($stmt)) {
       mysqli_stmt_close($stmt);

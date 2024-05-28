@@ -42,20 +42,22 @@
       <!-- ADD NEW BUTTON -->
       <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
         onclick="window.location.href = 'operation/lecturer/addLecturer.php'">Add New</button>
-
-      <!-- SECRCH BAR -->
-      <div class="position-relative d-inline">
-        <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Lecturer Id" id="lecturerIdInput">
-        <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
-      </div>
+      <form autocomplete="off">
+        <!-- SECRCH BAR -->
+        <div class="position-relative d-inline">
+          <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Lecturer Name" id="lecturerNameInput">
+          <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
+        </div>
+      </form>
       <!-- TABLE -->
       <table class="table table-striped table-bordered border-dark mt-4" id="lecturerTable">
         <!-- TABLE HEAD -->
         <thead>
           <div class="row">
             <th scope="col" class="col-1 text-center">#</th>
-            <th scope="col" class="col-2">Lecturer Id</th>
             <th scope="col" class="col-3">Name</th>
+            <th scope="col" class="col-1 text-center">Gender</th>
+            <th scope="col" class="col-1 text-center">Race</th>
             <th scope="col" class="col-2">Phone number</th>
             <th scope="col" class="col-2">Email</th>
             <th scope="col" class="col-2 text-center">
@@ -68,7 +70,7 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT lecturer_id, lecturer_name, lecturer_phone_number, lecturer_email FROM lecturer ORDER BY lecturer_id";
+              $sql = "SELECT lecturer_id, lecturer_name, lecturer_gender, lecturer_race, lecturer_phone_number, lecturer_email FROM lecturer WHERE lecturer_archive = 0 ORDER BY lecturer_id";
 
               $result = mysqli_query($conn, $sql);
 
@@ -78,8 +80,9 @@
           <!-- TABLE ROW -->
           <tr>
             <td scope="row" class="text-center"><?php echo $count++ ?></td>
-            <td scope="row"><?php echo $row["lecturer_id"] ?></td>
             <td scope="row"><?php echo $row["lecturer_name"] ?></td>
+            <td scope="row" class="text-center"><?php echo $row["lecturer_gender"] ?></td>
+            <td scope="row" class="text-center"><?php echo $row["lecturer_race"] ?></td>
             <td scope="row"><?php echo $row["lecturer_phone_number"] ?></td>
             <td scope="row"><?php echo $row["lecturer_email"] ?></td>
             <!-- OPERATION -->
@@ -98,7 +101,8 @@
                 <div class="col-4 text-center">
                   <a href="#">
                     <i class="fa-solid fa-trash text-danger"
-                      onclick="deleteLecturer('<?php echo $row['lecturer_id']?>')" name="delete"></i>
+                      onclick="deleteLecturer('<?php echo $row['lecturer_id']?>', '<?php echo htmlspecialchars($row['lecturer_name'])?>')"
+                      name="delete"></i>
                   </a>
                 </div>
               </div>
@@ -126,22 +130,23 @@
   }
   window.onload = init;
 
-  const deleteLecturer = (id) => {
-    const result = confirm(`Delete ${id}?`);
+  const deleteLecturer = (id, name) => {
+    const result = confirm(`Archive ${name}?`);
     if (result) {
       window.location.href = `crud/lecturer/deleteLecturerOperation.php?id=${id}`;
     }
   }
 
+  // SEARCH
   $(document).ready(function() {
-    $('#lecturerIdInput').on('input', function() {
-      var lecturerId = $(this).val().trim();
+    $('#lecturerNameInput').on('input', function() {
+      var lecturerName = $(this).val().trim();
 
       $.ajax({
         url: 'operation/lecturer/searchLecturer.php',
         method: 'GET',
         data: {
-          lecturerId: lecturerId
+          lecturerName: lecturerName
         },
         success: function(response) {
           $('#lecturerTable tbody').empty();
@@ -151,8 +156,9 @@
               $('#lecturerTable tbody').append(`
                   <tr>
                     <td class="text-center">${index + 1}</td>
-                    <td>${lecturer.lecturer_id}</td>
                     <td>${lecturer.lecturer_name}</td>
+                    <td class='text-center'>${lecturer.lecturer_gender}</td>
+                    <td class='text-center'>${lecturer.lecturer_race}</td>
                     <td>${lecturer.lecturer_phone_number}</td>
                     <td>${lecturer.lecturer_email}</td>
                     <td class="text-center">
@@ -168,7 +174,7 @@
                           </a>
                         </div>
                         <div class="col-4 text-center">
-                          <a href="#" onclick="deleteLecturer('${lecturer.lecturer_id}')">
+                          <a href="#" onclick="deleteLecturer('${lecturer.lecturer_id}', '${lecturer.lecturer_name}')">
                             <i class="fa-solid fa-trash text-danger"></i>
                           </a>
                         </div>
@@ -180,7 +186,7 @@
           } else {
             $('#lecturerTable tbody').append(`
                 <tr>
-                  <td colspan="6" class="text-center">No lecturers found</td>
+                  <td colspan="7" class="text-center">No lecturers found</td>
                 </tr>
               `);
           }

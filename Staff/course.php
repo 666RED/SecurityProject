@@ -42,11 +42,14 @@
       <!-- ADD NEW BUTTON -->
       <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
         onclick="window.location.href = 'operation/course/addCourse.php'">Add New</button>
-      <!-- SECRCH BAR -->
-      <div class="position-relative d-inline">
-        <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Course code" id="courseCodeInput">
-        <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
-      </div>
+      <form autocomplete="off">
+
+        <!-- SECRCH BAR -->
+        <div class="position-relative d-inline">
+          <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Course code" id="courseCodeInput">
+          <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
+        </div>
+      </form>
       <!-- TABLE -->
       <table class="table table-striped table-bordered border-dark mt-4" id="courseTable">
         <!-- TABLE HEAD -->
@@ -74,7 +77,7 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT course_code, course_name, course_credit_hour FROM course ORDER BY course_credit_hour, course_code";
+              $sql = "SELECT course_code, course_name, course_credit_hour FROM course WHERE course_archive = 0 ORDER BY course_credit_hour, course_code";
 
               $result = mysqli_query($conn, $sql);
 
@@ -129,7 +132,7 @@
   window.onload = init;
 
   const deleteCourse = (code, name) => {
-    const result = confirm(`Delete ${name}?`);
+    const result = confirm(`Archive ${name}?`);
     if (result) {
       window.location.href = `crud/course/deleteCourseOperation.php?id=${code}`;
     }

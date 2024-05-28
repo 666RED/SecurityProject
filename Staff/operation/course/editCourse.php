@@ -35,7 +35,7 @@
 
 <body>
   <form class="w-50 mx-auto rounded border border-secondary px-2 pt-2 pb-4 mt-4 position-relative"
-    action="../../crud/course/editCourseOperation.php" method="POST">
+    action="../../crud/course/editCourseOperation.php?id=<?php echo $_GET['id'] ?>" method="POST">
     <!-- CANCEL BUTTON -->
     <button type="button" onclick="handleCancel()"
       class="btn btn-secondary position-absolute end-0 me-3 mt-1">CANCEL</button>
@@ -44,8 +44,9 @@
     <hr>
     <!-- COURSE CODE -->
     <p>Course code:</p>
-    <input type="text" class="form-control border border-secondary course-code" readonly
-      value="<?php echo $row["course_code"]?>" name="code" style="cursor: not-allowed">
+    <input type="text" class="form-control border border-secondary" id="courseCodeInput"
+      value="<?php echo $row["course_code"]?>" name="code" onchange="handleOnChange()">
+    <span id="courseCodeMessage"></span>
     <!-- COURSE NAME -->
     <p class="mt-3">Course name:</p>
     <input type="text" class="form-control border border-secondary" required maxlength="100"
@@ -56,10 +57,11 @@
       value="<?php echo $row["course_credit_hour"]?>" onchange="handleOnChange()" name="credit-hour">
     <!-- EDIT BUTTON -->
     <div class="text-center">
-      <button class="btn btn-success block w-50 mx-auto mt-5" type="submit" name="edit">EDIT</button>
+      <button class="btn btn-success block w-50 mx-auto mt-5" type="submit" name="edit" id="edit-button">EDIT</button>
     </div>
   </form>
-
+  <!-- JS SCRIPT -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
   let discardChanges = false;
 
@@ -78,6 +80,39 @@
       window.location.href = '../../course.php';
     }
   }
+
+  $(document).ready(function() {
+    $('#courseCodeInput').on('input', function() {
+      var courseCode = $(this).val().trim();
+      console.log('hello');
+
+
+      if (courseCode !== '') {
+        $.ajax({
+          url: 'checkCourseCodeEdit.php?id=<?php echo $_GET['id'] ?>',
+          method: 'POST',
+          data: {
+            course_code: courseCode
+          },
+          success: function(response) {
+            if (response === 'exists') {
+              $('#courseCodeMessage').html('<span style="color: red;">Course code already exists</span>');
+              $('#edit-button').prop('disabled', true);
+            } else {
+              $('#courseCodeMessage').html('');
+              $('#edit-button').prop('disabled', false);
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
+        });
+      } else {
+        $('#courseCodeMessage').html('');
+        $('#edit-button').prop('disabled', false);
+      }
+    });
+  });
   </script>
 </body>
 

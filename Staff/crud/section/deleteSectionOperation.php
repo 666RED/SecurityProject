@@ -6,7 +6,7 @@
     $sectionNumber = $_GET['number'];
     $sectionType = $_GET['type'];
 
-    $sql = "DELETE FROM section WHERE course_code = ? AND section_number = ? AND section_type = ?";
+    $sql = "UPDATE section SET section_archive = 1 WHERE course_code = ? AND section_number = ? AND section_type = ?";
 
     $stmt = mysqli_stmt_init($conn);
 
@@ -16,10 +16,10 @@
       if (mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);
         mysqli_close($conn);
-        echo '<script>alert("Section deleted successfully"); window.location.href = "../../section.php";</script>';
+        echo '<script>alert("Section archived successfully"); window.location.href = "../../section.php";</script>';
         exit();
       } else {
-        echo "Error deleting section: " . mysqli_stmt_error($stmt);
+        echo "Error archiving section: " . mysqli_stmt_error($stmt);
       }
     } else {
       echo "Prepare statement error: " . mysqli_stmt_error($stmt);

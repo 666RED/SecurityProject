@@ -42,11 +42,13 @@
       <!-- ADD NEW BUTTON -->
       <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
         onclick="window.location.href = 'operation/section/addSection.php'">Add New</button>
-      <!-- SEARCH BAR -->
-      <div class="position-relative d-inline">
-        <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Course code" id="courseCodeInput">
-        <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
-      </div>
+      <form autocomplete="off">
+        <!-- SEARCH BAR -->
+        <div class="position-relative d-inline">
+          <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Course code" id="courseCodeInput">
+          <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
+        </div>
+      </form>
       <!-- TABLE -->
       <table class="table table-striped table-bordered border-dark mt-4" id="sectionTable">
         <!-- TABLE HEAD -->
@@ -83,7 +85,11 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT s.course_code, s.section_number, s.section_day, s.section_start_time, s.section_end_time, s.section_quota, s.section_type, l.lecturer_name FROM section s JOIN lecturer l ON s.lecturer_id = l.lecturer_id ORDER BY s.course_code, s.section_number";
+              $sql = "SELECT s.course_code, s.section_number, s.section_day, s.section_start_time, s.section_end_time, s.section_quota, s.section_type, l.lecturer_name 
+                FROM section s 
+                JOIN lecturer l ON s.lecturer_id = l.lecturer_id 
+                WHERE s.section_archive = 0 
+                ORDER BY s.course_code, s.section_number;";
 
               $result = mysqli_query($conn, $sql);
 
@@ -149,7 +155,7 @@
   window.onload = init;
 
   const deleteSection = (code, number, type) => {
-    const result = confirm(`Delete ${code} section ${number}?`);
+    const result = confirm(`Archive ${code} section ${number}?`);
     if (result) {
       window.location.href = `crud/section/deleteSectionOperation.php?code=${code}&number=${number}&type=${type}`;
     }

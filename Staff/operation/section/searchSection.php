@@ -6,7 +6,7 @@
   $sql = "SELECT s.*, l.lecturer_name 
     FROM section s
     INNER JOIN lecturer l ON s.lecturer_id = l.lecturer_id
-    WHERE s.course_code LIKE ?
+    WHERE s.course_code LIKE ? AND s.section_archive = 0
     ORDER BY s.course_code, s.section_number";
 
   $stmt = $conn->prepare($sql);

@@ -37,7 +37,7 @@
       <p class="m-0 me-2">Course code:</p>
       <select name="course-code" id="course-code-select" oninput="handleoninput()">
         <?php 
-          $sql = "SELECT course_code, course_name FROM course ORDER BY course_code";
+          $sql = "SELECT course_code, course_name FROM course WHERE course_archive = 0 ORDER BY course_code";
 
           $result = mysqli_query($conn, $sql);
 
@@ -158,7 +158,7 @@
         <div class="col">
           <select name="lecturer" id="lecturer-select" class="w-100 h-100 rounded" oninput="handleoninput()">
             <?php
-              $sql = "SELECT lecturer_id, lecturer_name FROM lecturer ORDER BY lecturer_name";
+              $sql = "SELECT lecturer_id, lecturer_name FROM lecturer WHERE lecturer_archive = 0 ORDER BY lecturer_name";
               $result = mysqli_query($conn, $sql);
 
               if (mysqli_num_rows($result) > 0) {
