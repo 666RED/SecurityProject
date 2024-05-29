@@ -93,16 +93,23 @@
             <!-- OPERATION -->
             <td>
               <div class="row">
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                   <a href="./operation/course/editCourse.php?id=<?php echo $row["course_code"]?>">
                     <i class="fa-solid fa-pencil text-success"></i>
                   </a>
                 </div>
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                   <a href="#">
                     <i class="fa-solid fa-trash text-danger"
                       onclick="deleteCourse('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['course_name'], ENT_QUOTES)?>')"
                       name="delete"></i>
+                  </a>
+                </div>
+                <div class="col-4 text-center">
+                  <a href="#">
+                    <i class="fa-solid fa-arrows-spin"
+                      onclick="resetCourse('<?php echo $row['course_code']?>', '<?php echo htmlspecialchars($row['course_name'], ENT_QUOTES)?>')"
+                      name="reset"></i>
                   </a>
                 </div>
               </div>
@@ -137,6 +144,12 @@
       window.location.href = `crud/course/deleteCourseOperation.php?id=${code}`;
     }
   }
+  const resetCourse = (code, name) => {
+    const result = confirm(`⚠️Reset ${name}? It will remove all student enrollments`);
+    if (result) {
+      window.location.href = `crud/course/resetCourseOperation.php?courseCode=${code}`;
+    }
+  }
   // SEARCH
   $(document).ready(function() {
     $('#courseCodeInput').on('input', function() {
@@ -161,14 +174,21 @@
                     <td class="text-center">${course.course_credit_hour}</td>
                     <td>
                       <div class="row">
-                        <div class="col-6 text-center">
+                        <div class="col-4 text-center">
                           <a href="./operation/course/editCourse.php?id=${course.course_code}">
                             <i class="fa-solid fa-pencil text-success"></i>
                           </a>
                         </div>
-                        <div class="col-6 text-center">
+                        <div class="col-4 text-center">
                           <a href="#" onclick="deleteCourse('${course.course_code}', '${course.course_name}')">
                             <i class="fa-solid fa-trash text-danger"></i>
+                          </a>
+                        </div>
+                        <div class="col-4 text-center">
+                          <a href="#">
+                            <i class="fa-solid fa-arrows-spin"
+                              onclick="resetCourse('${course.course_code}', '${course.course_name}')"
+                              name="reset"></i>
                           </a>
                         </div>
                       </div>

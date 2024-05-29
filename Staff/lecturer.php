@@ -42,8 +42,8 @@
       <!-- ADD NEW BUTTON -->
       <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
         onclick="window.location.href = 'operation/lecturer/addLecturer.php'">Add New</button>
+      <!-- SECRCH BAR -->
       <form autocomplete="off">
-        <!-- SECRCH BAR -->
         <div class="position-relative d-inline">
           <input type="text" class="ps-1 pe-4 py-1 rounded mt-2" placeholder="Lecturer Name" id="lecturerNameInput">
           <i class="fas fa-search position-absolute end-0 top-50 translate-middle-y me-2"></i>
@@ -70,7 +70,7 @@
           <?php 
               $count = 1;
 
-              $sql = "SELECT lecturer_id, lecturer_name, lecturer_gender, lecturer_race, lecturer_phone_number, lecturer_email FROM lecturer WHERE lecturer_archive = 0 ORDER BY lecturer_id";
+              $sql = "SELECT lecturer_id, lecturer_name, lecturer_gender, lecturer_race, lecturer_phone_number, lecturer_email FROM lecturer WHERE lecturer_archive = 0 ORDER BY lecturer_name";
 
               $result = mysqli_query($conn, $sql);
 
@@ -122,6 +122,7 @@
       </table>
     </div>
   </div>
+  <!-- JS SCRIPT -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
   // CLEAR SEARCH INPUT
