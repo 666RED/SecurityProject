@@ -129,7 +129,7 @@
       var courseCode = $(this).val().trim();
 
       $.ajax({
-        url: 'operation/course/searchCourse.php',
+        url: 'operation/searchCourse.php',
         method: 'GET',
         data: {
           courseCode: courseCode
@@ -158,7 +158,7 @@
           } else {
             $('#courseTable tbody').append(`
                 <tr>
-                  <td colspan="5" class="text-center">No courses found</td>
+                  <td colspan="6" class="text-center">No courses found</td>
                 </tr>
               `);
           }

@@ -58,7 +58,7 @@ if (isset($_GET['course_code']) && isset($_GET['section_number'])) {
         </div>
       </form>
       <!-- TABLE -->
-      <table class="table table-striped table-bordered border-dark mt-4" id="courseTable">
+      <table class="table table-striped table-bordered border-dark mt-4" id="studentTable">
         <!-- TABLE HEAD -->
         <thead>
           <div class="row">
@@ -95,7 +95,7 @@ if (isset($_GET['course_code']) && isset($_GET['section_number'])) {
               $sql = "SELECT ss.student_matric_number, s.student_name, ss.course_mark, ss.final_mark, ss.course_grade
               FROM student_section ss
               JOIN student s ON ss.student_matric_number = s.student_matric_number
-              WHERE ss.expired = 0 AND ss.lecturer_id = $lecturerID AND ss.section_number = $sectionNumber AND ss.course_code = '$courseCode'
+              WHERE ss.expired = 0 AND student_archive = 0 AND ss.lecturer_id = $lecturerID AND ss.section_number = $sectionNumber AND ss.course_code = '$courseCode'
               ORDER BY ss.student_matric_number;";
 
               $result = mysqli_query($conn, $sql);
@@ -133,6 +133,69 @@ if (isset($_GET['course_code']) && isset($_GET['section_number'])) {
       </table>
     </div>
   </div>
+
+  <!-- JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+  // CLEAR SEARCH INPUT
+  function init() {
+    document.getElementById("studentMaticInput").value = "";
+  }
+  window.onload = init;
+
+  // SEARCH
+  $(document).ready(function() {
+    $('#studentMaticInput').on('input', function() {
+      var student_matric_number = $(this).val().trim();
+      var courseCode = "<?php echo $courseCode?>";
+      var section_number = "<?php echo $sectionNumber ?>";
+
+      $.ajax({
+        url: 'operation/searchStudent.php',
+        method: 'GET',
+        data: {
+          student_matric_number: student_matric_number,
+          courseCode: courseCode,
+          section_number:section_number
+        },
+        success: function(response) {
+          $('#studentTable tbody').empty();
+          console.log(response);  // Log the JSON response to the console
+          if (response.length > 0) {
+            response.forEach((student, index) => {
+              $('#studentTable tbody').append(`
+                  <tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td class="text-center">${student.student_matric_number}</td>
+                    <td>${student.student_name}</td>
+                    <td class="text-center">${student.course_mark}</td>
+                    <td class="text-center">${student.final_mark}</td>
+                    <td class="text-center">${student.course_grade}</td>
+                    <td>
+                      <div class="row text-center">
+                        <a href="./student.php?student=${student.student_matric_number}&course_code=${student.course_code}&section_number=${student.section_number}">
+                          <i class="fa-solid fa-pencil text-success"></i>
+                        </a>
+                    </td>
+                  </tr>
+                `);
+            });
+          } else {
+            $('#studentTable tbody').append(`
+                <tr>
+                  <td colspan="6" class="text-center">No courses found</td>
+                </tr>
+              `);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error searching:', error);
+        }
+      });
+    });
+  });
+  </script>
+  </script>
 </body>
 </html>
 
