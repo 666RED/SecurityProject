@@ -64,7 +64,7 @@ if (!empty($courses)) {
         return "'" . $course['course_code'] . "'";
     }, $courses);
     $course_codes_str = implode(',', $course_codes);
-    $sql_sections = "SELECT * FROM section WHERE course_code IN ($course_codes_str)";
+    $sql_sections = "SELECT * FROM section WHERE course_code IN ($course_codes_str) AND section_archive = 0 GROUP BY section_number";
     $result_sections = $conn->query($sql_sections);
 
     if ($result_sections->num_rows > 0) {
