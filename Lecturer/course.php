@@ -29,7 +29,7 @@
     <!-- SIDEBAR -->
     <div class="bg-dark text-white sidebar">
       <a href="course.php" class="btn nav-btn text-white d-block text-start selected">Course</a>
-      <a href="#" class="btn nav-btn text-white d-block text-start">Profile</a>
+      <a href="profile.php" class="btn nav-btn text-white d-block text-start">Profile</a>
       <a href="clearId.php"
         class="btn nav-btn text-white d-block text-start position-absolute w-100 bottom-0">Logout</a>
     </div>
