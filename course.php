@@ -11,7 +11,7 @@ if (!isset($_SESSION['student_matric_number'])) {
 $student_matric_number = $_SESSION['student_matric_number']; // Assuming the student matric number is stored in session
 
 // Fetch enrolled courses
-$sql = "SELECT ss.course_code, c.course_name, c.course_credit_hour, ss.course_mark, ss.course_grade, ss.section_number, ss.lecturer_id, ss.enrollment_date, ss.expired
+$sql = "SELECT ss.course_code, c.course_name, c.course_credit_hour, ss.quiz_mark, ss.assignment_mark, ss.test_mark, ss.project_mark, ss.course_mark, ss.final_mark, ss.course_grade, ss.section_number, ss.lecturer_id, ss.enrollment_date, ss.expired
         FROM student_section ss 
         JOIN course c ON ss.course_code = c.course_code 
         WHERE ss.student_matric_number = '$student_matric_number'";
@@ -29,9 +29,9 @@ if ($result->num_rows > 0) {
 // Generate report
 if (isset($_POST['generate_report'])) {
     $report = "Course Report for Student Matric Number: $student_matric_number\n\n";
-    $report .= "Course Code\tCourse Name\tCredit Hours\tMarks\tGrade\tSection Number\tLecturer ID\tEnrollment Date\tExpired\n";
+    $report .= "Course Code\tCourse Name\tCredit Hours\tQuiz\tAssignemnt\tTest\tProject\tCoursework Marks\tGrade\tSection Number\tLecturer ID\tEnrollment Date\tExpired\n";
     foreach ($courses as $course) {
-        $report .= "{$course['course_code']}\t{$course['course_name']}\t{$course['course_credit_hour']}\t{$course['course_mark']}\t{$course['course_grade']}\t{$course['section_number']}\t{$course['lecturer_id']}\t{$course['enrollment_date']}\t{$course['expired']}\n";
+        $report .= "{$course['course_code']}\t{$course['course_name']}\t{$course['course_credit_hour']}\t{$course['quiz_mark']}\t{$course['assignment_mark']}\t{$course['test_mark']}\t{$course['project_mark']}\t{$course['course_mark']}\t{$course['course_grade']}\t{$course['section_number']}\t{$course['lecturer_id']}\t{$course['enrollment_date']}\t{$course['expired']}\n";
     }
     $report .= "\nTotal Credits: $total_credits\n";
     
@@ -155,24 +155,30 @@ if (isset($_POST['generate_report'])) {
                 <th>Course Name</th>
                 <th>Course Code</th>
                 <th>Credit Hours</th>
-                <th>Marks</th>
+                <th>Quiz</th>
+                <th>Assignment</th>
+                <th>Test</th>
+                <th>Project</th>
+                <th>Coursework Marks</th>
                 <th>Grade</th>
                 <th>Section Number</th>
                 <th>Lecturer ID</th>
                 <th>Enrollment Date</th>
-                <th>Expired</th>
             </tr>
             <?php foreach ($courses as $course): ?>
             <tr>
                 <td><?php echo $course['course_name']; ?></td>
                 <td><?php echo $course['course_code']; ?></td>
                 <td><?php echo $course['course_credit_hour']; ?></td>
+                <td><?php echo $course['quiz_mark']; ?></td>
+                <td><?php echo $course['assignment_mark']; ?></td>
+                <td><?php echo $course['test_mark']; ?></td>
+                <td><?php echo $course['project_mark']; ?></td>
                 <td><?php echo $course['course_mark']; ?></td>
                 <td><?php echo $course['course_grade']; ?></td>
                 <td><?php echo $course['section_number']; ?></td>
                 <td><?php echo $course['lecturer_id']; ?></td>
                 <td><?php echo $course['enrollment_date']; ?></td>
-                <td><?php echo $course['expired']; ?></td>
             </tr>
             <?php endforeach; ?>
         </table>
