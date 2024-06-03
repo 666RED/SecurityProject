@@ -200,7 +200,7 @@ if ($result->num_rows > 0) {
         <input type="email" id="student_student_email" name="student_student_email" class="w3-input" maxlength="30" value="<?php echo $student['student_student_email']; ?>">
         
         <label for="student_phone_number">Phone Number</label>
-        <input type="text" id="student_phone_number" name="student_phone_number" class="w3-input" placeholder="Phone Number" value="<?php echo $student['student_phone_number']; ?>">
+        <input type="text" id="student_phone_number" name="student_phone_number" class="w3-input" maxlength="11" pattern="\d{11}" placeholder="Without ( - )" value="<?php echo $student['student_phone_number']; ?>">
         
         <label for="student_IC">IC</label>
         <input type="text" id="student_IC" name="student_IC" class="w3-input" maxlength="12" pattern="\d{12}" placeholder="Without ( - )" value="<?php echo $student['student_IC']; ?>">
