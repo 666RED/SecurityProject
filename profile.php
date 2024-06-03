@@ -6,22 +6,46 @@ session_start();
 $student_student_email = $_SESSION['student_student_email']; // Assuming the student email is stored in session
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $student_matric_number = $_POST['student_matric_number'];
-    $student_name = $_POST['student_name'];
-    $student_password = $_POST['student_password'];
-    $student_DOB = $_POST['student_DOB'];
-    $student_gender = $_POST['student_gender'];
-    $student_student_email = $_POST['student_student_email'];
-    $student_phone_number = $_POST['student_phone_number'];
-    $student_IC = $_POST['student_IC'];
-    $student_nationality = $_POST['student_nationality'];
-    $student_race = $_POST['student_race'];
-    $student_personal_email = $_POST['student_personal_email'];
-    $student_muet_band = $_POST['student_muet_band'];
-    $student_pre_university_result = $_POST['student_pre_university_result'];
+    // Fetch current data
+    $sql = "SELECT * FROM student WHERE student_student_email='$student_student_email'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $current_data = $result->fetch_assoc();
+    } else {
+        $error = "No user found.";
+    }
+
+    // Use current data if no new data is provided
+    $student_matric_number = !empty($_POST['student_matric_number']) ? $_POST['student_matric_number'] : $current_data['student_matric_number'];
+    $student_name = !empty($_POST['student_name']) ? $_POST['student_name'] : $current_data['student_name'];
+    $student_password = !empty($_POST['student_password']) ? password_hash($_POST['student_password'], PASSWORD_DEFAULT) : $current_data['student_password'];
+    $student_DOB = !empty($_POST['student_DOB']) ? $_POST['student_DOB'] : $current_data['student_DOB'];
+    $student_gender = !empty($_POST['student_gender']) ? $_POST['student_gender'] : $current_data['student_gender'];
+    $student_student_email = !empty($_POST['student_student_email']) ? $_POST['student_student_email'] : $current_data['student_student_email'];
+    $student_phone_number = !empty($_POST['student_phone_number']) ? $_POST['student_phone_number'] : $current_data['student_phone_number'];
+    $student_IC = !empty($_POST['student_IC']) ? $_POST['student_IC'] : $current_data['student_IC'];
+    $student_nationality = !empty($_POST['student_nationality']) ? $_POST['student_nationality'] : $current_data['student_nationality'];
+    $student_race = !empty($_POST['student_race']) ? $_POST['student_race'] : $current_data['student_race'];
+    $student_personal_email = !empty($_POST['student_personal_email']) ? $_POST['student_personal_email'] : $current_data['student_personal_email'];
+    $student_muet_band = !empty($_POST['student_muet_band']) ? $_POST['student_muet_band'] : $current_data['student_muet_band'];
+    $student_pre_university_result = !empty($_POST['student_pre_university_result']) ? $_POST['student_pre_university_result'] : $current_data['student_pre_university_result'];
 
     // Update user information
-    $sql = "UPDATE student SET student_matric_number='$student_matric_number', student_name='$student_name', student_password='$student_password', student_DOB='$student_DOB', student_gender='$student_gender', student_student_email='$student_student_email', student_phone_number='$student_phone_number', student_IC='$student_IC', student_nationality='$student_nationality', student_race='$student_race', student_personal_email='$student_personal_email', student_muet_band='$student_muet_band', student_pre_university_result='$student_pre_university_result' WHERE student_student_email='$student_student_email'";
+    $sql = "UPDATE student SET 
+        student_matric_number='$student_matric_number', 
+        student_name='$student_name', 
+        student_password='$student_password', 
+        student_DOB='$student_DOB', 
+        student_gender='$student_gender', 
+        student_student_email='$student_student_email', 
+        student_phone_number='$student_phone_number', 
+        student_IC='$student_IC', 
+        student_nationality='$student_nationality', 
+        student_race='$student_race', 
+        student_personal_email='$student_personal_email', 
+        student_muet_band='$student_muet_band', 
+        student_pre_university_result='$student_pre_university_result' 
+        WHERE student_student_email='$student_student_email'";
     
     if ($conn->query($sql) === TRUE) {
         $success = "Profile updated successfully";
@@ -153,47 +177,48 @@ if ($result->num_rows > 0) {
 
     <form action="" method="post">
         <label for="student_matric_number">Matric Number</label>
-        <input type="text" id="student_matric_number" name="student_matric_number" class="w3-input" value="<?php echo $student['student_matric_number']; ?>" required>
+        <input type="text" id="student_matric_number" name="student_matric_number" class="w3-input" maxlength="8" value="<?php echo $student['student_matric_number']; ?>">
         
         <label for="student_name">Name</label>
-        <input type="text" id="student_name" name="student_name" class="w3-input" value="<?php echo $student['student_name']; ?>" required>
+        <input type="text" id="student_name" name="student_name" class="w3-input" maxlength="50" value="<?php echo $student['student_name']; ?>">
         
         <label for="student_password">Password</label>
-        <input type="password" id="student_password" name="student_password" class="w3-input" value="<?php echo $student['student_password']; ?>" required>
+        <input type="password" id="student_password" name="student_password" class="w3-input" placeholder="Password">
         
         <label for="student_DOB">Date of Birth</label>
-        <input type="date" id="student_DOB" name="student_DOB" class="w3-input" value="<?php echo $student['student_DOB']; ?>" required>
+        <input type="date" id="student_DOB" name="student_DOB" class="w3-input" value="<?php echo $student['student_DOB']; ?>">
         
         <label for="student_gender">Gender</label>
-        <select id="student_gender" name="student_gender" class="w3-select" required>
+        <select id="student_gender" name="student_gender" class="w3-select">
+            <option value="" disabled selected>Select gender</option>
             <option value="male" <?php if($student['student_gender'] == 'male') echo 'selected'; ?>>Male</option>
             <option value="female" <?php if($student['student_gender'] == 'female') echo 'selected'; ?>>Female</option>
             <option value="other" <?php if($student['student_gender'] == 'other') echo 'selected'; ?>>Other</option>
         </select>
         
         <label for="student_student_email">Student Email</label>
-        <input type="email" id="student_student_email" name="student_student_email" class="w3-input" value="<?php echo $student['student_student_email']; ?>" required>
+        <input type="email" id="student_student_email" name="student_student_email" class="w3-input" maxlength="30" value="<?php echo $student['student_student_email']; ?>">
         
         <label for="student_phone_number">Phone Number</label>
-        <input type="text" id="student_phone_number" name="student_phone_number" class="w3-input" value="<?php echo $student['student_phone_number']; ?>" required>
+        <input type="text" id="student_phone_number" name="student_phone_number" class="w3-input" placeholder="Phone Number" value="<?php echo $student['student_phone_number']; ?>">
         
         <label for="student_IC">IC</label>
-        <input type="text" id="student_IC" name="student_IC" class="w3-input" value="<?php echo $student['student_IC']; ?>" required>
+        <input type="text" id="student_IC" name="student_IC" class="w3-input" maxlength="12" pattern="\d{12}" placeholder="Without ( - )" value="<?php echo $student['student_IC']; ?>">
         
         <label for="student_nationality">Nationality</label>
-        <input type="text" id="student_nationality" name="student_nationality" class="w3-input" value="<?php echo $student['student_nationality']; ?>" required>
+        <input type="text" id="student_nationality" name="student_nationality" class="w3-input" value="<?php echo $student['student_nationality']; ?>">
         
         <label for="student_race">Race</label>
-        <input type="text" id="student_race" name="student_race" class="w3-input" value="<?php echo $student['student_race']; ?>" required>
+        <input type="text" id="student_race" name="student_race" class="w3-input" value="<?php echo $student['student_race']; ?>">
         
         <label for="student_personal_email">Personal Email</label>
-        <input type="email" id="student_personal_email" name="student_personal_email" class="w3-input" value="<?php echo $student['student_personal_email']; ?>" required>
+        <input type="email" id="student_personal_email" name="student_personal_email" class="w3-input" placeholder="Email" value="<?php echo $student['student_personal_email']; ?>">
         
         <label for="student_muet_band">MUET Band</label>
-        <input type="text" id="student_muet_band" name="student_muet_band" class="w3-input" value="<?php echo $student['student_muet_band']; ?>" required>
+        <input type="text" id="student_muet_band" name="student_muet_band" class="w3-input" maxlength="1" placeholder="1 - 6" value="<?php echo $student['student_muet_band']; ?>">
         
         <label for="student_pre_university_result">Pre-University Result</label>
-        <input type="text" id="student_pre_university_result" name="student_pre_university_result" class="w3-input" value="<?php echo $student['student_pre_university_result']; ?>" required>
+        <input type="text" id="student_pre_university_result" name="student_pre_university_result" class="w3-input" maxlength="4" pattern="\d(\.\d{1,2})?" placeholder="0.00" value="<?php echo $student['student_pre_university_result']; ?>">
 
         <button type="submit" class="w3-button w3-#3780a3 w3-margin-top">Update Profile</button>
     </form>
