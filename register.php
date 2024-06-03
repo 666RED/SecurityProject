@@ -154,10 +154,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <p id="error_message" style="color:red;"></p>
         <form action="" method="post" onsubmit="return validateForm()">
             <label for="student_matric_number"><b>Matric Number</b></label>
-            <input type="text" id="student_matric_number" name="student_matric_number" placeholder="Enter your matric number" required>
+            <input type="text" id="student_matric_number" name="student_matric_number" placeholder="Enter your matric number" required maxlength="8">
                 
             <label for="student_name"><b>Name</b></label>
-            <input type="text" id="student_name" name="student_name" placeholder="Enter your name" required>
+            <input type="text" id="student_name" name="student_name" placeholder="Enter your name" required maxlength="50">
                 
             <label for="student_password"><b>Password</b></label>
             <input type="password" id="student_password" name="student_password" placeholder="Enter your password" required>
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </select>
                 
             <label for="student_student_email"><b>Student Email</b></label>
-            <input type="email" id="student_student_email" name="student_student_email" placeholder="Enter your student email" required>
+            <input type="email" id="student_student_email" name="student_student_email" placeholder="Enter your student email" required maxlength="30">
                 
             <button type="submit" class="login-button">Sign up</button>
         </form>
