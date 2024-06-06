@@ -10,34 +10,53 @@ if (!isset($_SESSION['student_matric_number'])) {
 
 $student_matric_number = $_SESSION['student_matric_number']; // Assuming the student matric number is stored in session
 
+$max_attempts = 2;
+$attempt_window = '15 MINUTE'; // Time window for rate limiting
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll'])) {
     $course_code = $_POST['course_code'];
     $section_number = $_POST['section_number'];
 
-    // Fetch the lecturer_id for the selected section
-    $sql_lecturer = "SELECT lecturer_id FROM section WHERE course_code='$course_code' AND section_number='$section_number'";
-    $result_lecturer = $conn->query($sql_lecturer);
-    if ($result_lecturer->num_rows > 0) {
-        $lecturer = $result_lecturer->fetch_assoc();
-        $lecturer_id = $lecturer['lecturer_id'];
-
-        // Check if the student is already enrolled in the course
-        $sql_check = "SELECT * FROM student_section WHERE student_matric_number = '$student_matric_number' AND course_code = '$course_code' AND section_number = '$section_number'";
-        $result_check = $conn->query($sql_check);
-
-        if ($result_check->num_rows > 0) {
-            $error = "You are already enrolled in this course.";
-        } else {
-            // Enroll the student in the course
-            $sql = "INSERT INTO student_section (student_matric_number, course_code, section_number, lecturer_id, enrollment_date) VALUES ('$student_matric_number', '$course_code', '$section_number', '$lecturer_id', CURDATE())";
-            if ($conn->query($sql) === TRUE) {
-                $success = "Course enrolled successfully";
-            } else {
-                $error = "Error: " . $sql . "<br>" . $conn->error;
-            }
-        }
+    if (isRateLimited($student_matric_number, $max_attempts, $attempt_window, $conn)) {
+        header('Location: error.php');
+        exit();
     } else {
-        $error = "Section not found.";
+        // Fetch the lecturer_id for the selected section
+        $sql_lecturer = "SELECT lecturer_id FROM section WHERE course_code=? AND section_number=?";
+        $stmt_lecturer = $conn->prepare($sql_lecturer);
+        $stmt_lecturer->bind_param('ss', $course_code, $section_number);
+        $stmt_lecturer->execute();
+        $result_lecturer = $stmt_lecturer->get_result();
+
+        if ($result_lecturer->num_rows > 0) {
+            $lecturer = $result_lecturer->fetch_assoc();
+            $lecturer_id = $lecturer['lecturer_id'];
+
+            // Check if the student is already enrolled in the course
+            $sql_check = "SELECT * FROM student_section WHERE student_matric_number = ? AND course_code = ? AND section_number = ?";
+            $stmt_check = $conn->prepare($sql_check);
+            $stmt_check->bind_param('sss', $student_matric_number, $course_code, $section_number);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result();
+
+            if ($result_check->num_rows > 0) {
+                $error = "You are already enrolled in this course.";
+            } else {
+                // Enroll the student in the course
+                $sql = "INSERT INTO student_section (student_matric_number, course_code, section_number, lecturer_id, enrollment_date) VALUES (?, ?, ?, ?, CURDATE())";
+                $stmt_enroll = $conn->prepare($sql);
+                $stmt_enroll->bind_param('ssss', $student_matric_number, $course_code, $section_number, $lecturer_id);
+
+                if ($stmt_enroll->execute()) {
+                    logEnrollmentAttempt($student_matric_number, $conn);
+                    $success = "Course enrolled successfully";
+                } else {
+                    $error = "Error: " . $stmt_enroll->error;
+                }
+            }
+        } else {
+            $error = "Section not found.";
+        }
     }
 }
 
@@ -47,8 +66,12 @@ if (isset($_GET['search'])) {
 }
 
 // Fetch courses based on search term
-$sql = "SELECT * FROM course WHERE course_name LIKE '%$search_term%'";
-$result = $conn->query($sql);
+$sql = "SELECT * FROM course WHERE course_archive = 0 AND course_name LIKE ?";
+$stmt = $conn->prepare($sql);
+$search_term_wildcard = '%' . $search_term . '%';
+$stmt->bind_param('s', $search_term_wildcard);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $courses = [];
 if ($result->num_rows > 0) {
@@ -61,15 +84,21 @@ if ($result->num_rows > 0) {
 $sections = [];
 if (!empty($courses)) {
     $course_codes = array_map(function($course) {
-        return "'" . $course['course_code'] . "'";
+        return $course['course_code'];
     }, $courses);
-    $course_codes_str = implode(',', $course_codes);
-    $sql_sections = "SELECT * FROM section WHERE course_code IN ($course_codes_str) AND section_archive = 0 GROUP BY section_number";
-    $result_sections = $conn->query($sql_sections);
 
-    if ($result_sections->num_rows > 0) {
-        while ($row = $result_sections->fetch_assoc()) {
-            $sections[$row['course_code']][] = $row;
+    if (!empty($course_codes)) {
+        $placeholders = implode(',', array_fill(0, count($course_codes), '?'));
+        $sql_sections = "SELECT * FROM section WHERE course_code IN ($placeholders) AND section_archive = 0 GROUP BY section_number, course_code";
+        $stmt_sections = $conn->prepare($sql_sections);
+        $stmt_sections->bind_param(str_repeat('s', count($course_codes)), ...$course_codes);
+        $stmt_sections->execute();
+        $result_sections = $stmt_sections->get_result();
+
+        if ($result_sections->num_rows > 0) {
+            while ($row = $result_sections->fetch_assoc()) {
+                $sections[$row['course_code']][] = $row;
+            }
         }
     }
 }
@@ -202,7 +231,7 @@ if (!empty($courses)) {
     <form action="" method="get">
         <label for="search">Search Course</label>
         <div style="display: flex;">
-            <input type="text" id="search" name="search" value="<?php echo $search_term; ?>" placeholder="Enter course name">
+            <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search_term); ?>" placeholder="Enter course name">
             <button type="submit" class="w3-button w3-blue">Search</button>
         </div>
     </form>
@@ -220,13 +249,13 @@ if (!empty($courses)) {
             </tr>
             <?php foreach ($courses as $course): ?>
             <tr>
-                <td><?php echo $course['course_name']; ?></td>
-                <td><?php echo $course['course_code']; ?></td>
-                <td><?php echo $course['course_credit_hour']; ?></td>
+                <td><?php echo htmlspecialchars($course['course_name']); ?></td>
+                <td><?php echo htmlspecialchars($course['course_code']); ?></td>
+                <td><?php echo htmlspecialchars($course['course_credit_hour']); ?></td>
                 <td>
                     <?php if (isset($sections[$course['course_code']])): ?>
                         <?php foreach ($sections[$course['course_code']] as $section): ?>
-                            Section <?php echo $section['section_number']; ?><br>
+                            Section <?php echo htmlspecialchars($section['section_number']); ?><br>
                         <?php endforeach; ?>
                     <?php else: ?>
                         No sections available
@@ -235,7 +264,7 @@ if (!empty($courses)) {
                 <td>
                     <?php if (isset($sections[$course['course_code']])): ?>
                         <?php foreach ($sections[$course['course_code']] as $section): ?>
-                            <button onclick="document.getElementById('enrollModal<?php echo $section['section_number']; ?>').style.display='block'" class="w3-button w3-small w3-green w3-round w3-margin-top">Enroll</button>
+                            <button onclick="document.getElementById('enrollModal<?php echo $section['section_number']; ?>').style.display='block'" class="w3-button w3-small w3-green w3-round w3-margin-top">Enroll</button><br>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <button class="w3-button w3-small w3-green w3-round w3-margin-top" disabled>Enroll</button>
@@ -260,20 +289,20 @@ if (!empty($courses)) {
                 <header class="w3-container w3-blue">
                     <span onclick="document.getElementById('enrollModal<?php echo $section['section_number']; ?>').style.display='none'" 
                     class="w3-button w3-display-topright w3-circle">&times;</span>
-                    <h2>Enroll in <?php echo $course_code; ?> - Section <?php echo $section['section_number']; ?></h2>
+                    <h2>Enroll in <?php echo htmlspecialchars($course_code); ?> - Section <?php echo htmlspecialchars($section['section_number']); ?></h2>
                 </header>
                 <div class="w3-container">
                     <form action="" method="post">
-                        <p>Course: <?php echo $course_code; ?></p>
-                        <p>Section: <?php echo $section['section_number']; ?></p>
-                        <p>Day: <?php echo $section['section_day']; ?></p>
-                        <p>Start Time: <?php echo $section['section_start_time']; ?></p>
-                        <p>End Time: <?php echo $section['section_end_time']; ?></p>
-                        <p>Duration: <?php echo $section['section_duration']; ?></p>
-                        <p>Quota: <?php echo $section['section_quota']; ?></p>
-                        <p>Location: <?php echo $section['section_location']; ?></p>
-                        <input type="hidden" name="course_code" value="<?php echo $course_code; ?>">
-                        <input type="hidden" name="section_number" value="<?php echo $section['section_number']; ?>">
+                        <p>Course: <?php echo htmlspecialchars($course_code); ?></p>
+                        <p>Section: <?php echo htmlspecialchars($section['section_number']); ?></p>
+                        <p>Day: <?php echo htmlspecialchars($section['section_day']); ?></p>
+                        <p>Start Time: <?php echo htmlspecialchars($section['section_start_time']); ?></p>
+                        <p>End Time: <?php echo htmlspecialchars($section['section_end_time']); ?></p>
+                        <p>Duration: <?php echo htmlspecialchars($section['section_duration']); ?></p>
+                        <p>Quota: <?php echo htmlspecialchars($section['section_quota']); ?></p>
+                        <p>Location: <?php echo htmlspecialchars($section['section_location']); ?></p>
+                        <input type="hidden" name="course_code" value="<?php echo htmlspecialchars($course_code); ?>">
+                        <input type="hidden" name="section_number" value="<?php echo htmlspecialchars($section['section_number']); ?>">
                         <input type="hidden" name="enroll" value="1">
                         <button type="submit" class="w3-button w3-green w3-margin-top">Enroll</button>
                     </form>
@@ -288,6 +317,26 @@ if (!empty($courses)) {
 <footer>
     <p>Student Management System © 2024. All rights reserved.</p>
 </footer>
+
+<?php
+function isRateLimited($student_matric_number, $max_attempts, $attempt_window, $conn) {
+    $sql = "SELECT COUNT(*) AS attempt_count FROM enrollment_attempts WHERE student_matric_number = ? AND attempt_time > (NOW() - INTERVAL $attempt_window)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $student_matric_number);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    return $row['attempt_count'] >= $max_attempts;
+}
+
+function logEnrollmentAttempt($student_matric_number, $conn) {
+    $sql = "INSERT INTO enrollment_attempts (student_matric_number, attempt_time) VALUES (?, NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $student_matric_number);
+    $stmt->execute();
+}
+?>
 
 </body>
 </html>
