@@ -39,9 +39,6 @@
 
     <div class="main-content">
       <h1 class="title">Student</h1>
-      <!-- ADD NEW BUTTON -->
-      <button class="add-new-button position-absolute d-flex flex-column align-items-center mt-3 me-3"
-        onclick="window.location.href = 'operation/student/addStudent.php'">Add New</button>
       <!-- SECRCH BAR -->
       <form autocomplete="off">
         <div class="position-relative d-inline">
