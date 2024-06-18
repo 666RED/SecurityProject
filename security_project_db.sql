@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 02, 2024 at 12:44 AM
+-- Generation Time: Jun 18, 2024 at 12:34 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -45,17 +45,37 @@ INSERT INTO `course` (`course_code`, `course_name`, `course_credit_hour`, `cours
 ('BIC30503', 'Software Security Engineering', 3, 0),
 ('BIC30513', 'Algorithm And Complexity', 3, 0),
 ('BUS202', 'Business Ethics', 3, 0),
-('CHE205', 'Organic Chemistry', 4, 0),
-('CS101', 'Introduction to Computer Science', 3, 0),
+('CHE205', 'Organic Chemistry', 4, 1),
+('CS101', 'Introduction to Computer Science', 3, 1),
 ('CSC301', 'Data Structures and Algorithms', 4, 0),
-('ENG110', 'English Composition', 4, 0),
+('ENG110', 'English Composition', 4, 1),
 ('ENG201', 'Advanced English Writing', 2, 0),
 ('MAT201', 'Calculus I', 4, 0),
 ('MUS120', 'Music Appreciation', 3, 0),
-('PHY105', 'Physics for Engineers', 3, 0),
+('PHY105', 'Physics for Engineers', 3, 1),
 ('PSY101', 'Introduction to Psychology', 3, 0),
 ('qwe 1234', 'test', 2, 1),
 ('test 123', 'testing purpose\\\'s', 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `enrollment_attempts`
+--
+
+CREATE TABLE `enrollment_attempts` (
+  `id` int(11) NOT NULL,
+  `student_matric_number` varchar(255) NOT NULL,
+  `attempt_time` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `enrollment_attempts`
+--
+
+INSERT INTO `enrollment_attempts` (`id`, `student_matric_number`, `attempt_time`) VALUES
+(1, 'AI210334', '2024-06-18 18:15:40'),
+(2, 'AI210334', '2024-06-18 18:15:42');
 
 -- --------------------------------------------------------
 
@@ -112,9 +132,16 @@ CREATE TABLE `section` (
 INSERT INTO `section` (`section_number`, `section_type`, `course_code`, `lecturer_id`, `section_day`, `section_start_time`, `section_end_time`, `section_duration`, `section_quota`, `section_location`, `section_archive`) VALUES
 (1, 'A', 'ACC101', 10, 'Mon', '05:08:00', '07:08:00', 2, 2, '2', 0),
 (2, 'A', 'bic12346', 10, 'Sun', '04:18:00', '05:18:00', 1, 2, '1', 1),
+(3, 'A', 'BIC30503', 12, 'Wed', '08:00:00', '10:00:00', 2, 40, 'BT1', 0),
 (3, 'A', 'BIC30513', 12, 'Wed', '02:00:00', '04:00:00', 2, 40, 'BT1', 0),
+(3, 'A', 'CSC301', 11, 'Sun', '16:00:00', '18:00:00', 2, 40, 'BT3', 0),
+(3, 'K', 'BIC30503', 12, 'Mon', '10:00:00', '12:00:00', 2, 40, 'Auditorium', 0),
 (3, 'K', 'BIC30513', 12, 'Mon', '09:00:00', '11:00:00', 2, 40, 'BS1', 0),
-(10, 'K', 'qwe 1234', 12, 'Tue', '05:31:00', '08:31:00', 3, 40, 'test', 1);
+(3, 'K', 'CSC301', 11, 'Sun', '14:00:00', '16:00:00', 2, 40, 'Auditorium', 0),
+(4, 'A', 'BIC30503', 12, 'Thu', '08:00:00', '10:00:00', 2, 40, 'BT1', 0),
+(4, 'K', 'BIC30503', 12, 'Mon', '10:00:00', '12:00:00', 2, 40, 'Auditorium', 0),
+(10, 'K', 'qwe 1234', 12, 'Tue', '05:31:00', '08:31:00', 3, 40, 'test', 1),
+(11, 'K', 'BUS202', 10, 'Tue', '08:00:00', '10:00:00', 2, 40, 'BK3', 0);
 
 -- --------------------------------------------------------
 
@@ -198,7 +225,9 @@ INSERT INTO `student_section` (`student_matric_number`, `course_code`, `section_
 ('AI210408', 'BIC30513', 3, 12, '5.00', '20.00', '15.00', '20.00', '60.00', '0.00', 'B-', '2024-05-21', b'0'),
 ('AI210334', 'BIC30513', 3, 12, '5.00', '20.00', '15.00', '20.00', '60.00', '40.00', 'A+', '2024-06-01', b'0'),
 ('AI210343', 'BIC30513', 3, 12, '5.00', '20.00', '11.00', '18.00', '54.00', '30.00', 'A', '2024-06-01', b'0'),
-('AI012345', 'BIC30513', 3, 12, '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', 'F', '2024-06-01', b'0');
+('AI012345', 'BIC30513', 3, 12, '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', 'F', '2024-06-01', b'0'),
+('AI210334', 'ACC101', 1, 10, '0.00', '0.00', '0.00', '0.00', NULL, '0.00', NULL, '2024-06-18', b'0'),
+('AI210334', 'BIC30503', 3, 12, '5.00', '20.00', '15.00', '20.00', '60.00', '40.00', 'A+', '2024-06-18', b'0');
 
 --
 -- Indexes for dumped tables
@@ -209,6 +238,12 @@ INSERT INTO `student_section` (`student_matric_number`, `course_code`, `section_
 --
 ALTER TABLE `course`
   ADD PRIMARY KEY (`course_code`);
+
+--
+-- Indexes for table `enrollment_attempts`
+--
+ALTER TABLE `enrollment_attempts`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `lecturer`
@@ -247,6 +282,12 @@ ALTER TABLE `student_section`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `enrollment_attempts`
+--
+ALTER TABLE `enrollment_attempts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `lecturer`
